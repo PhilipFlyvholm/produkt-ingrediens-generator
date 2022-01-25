@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=1, initial-scale=1.0">
+    <title>Produkt indhold</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body id="body" class="enableColors">
+    <div id="settings">
+        <h1>Vælg produkter</h1>
+        <input type="text" id="ordrenummer" placeholder="Ordre nummer">
+        <div id="produkter"></div>
+        <div class="produktInput"><input type="checkbox" class="checkbox" id="boringmode"><label for="boringmode">Enable
+                boring
+                mode...</label></div>
+        <div class="buttonArea">
+            <button type="submit" id="submit">Update</button>
+            <button type="submit" id="print" onclick="window.print();return false;">Print</button>
+        </div>
+    </div>
+    <h1 id="title"></h1>
+    <div id="output">
+
+    </div>
+    <script>
+        function readTextFile(file, callback) {
+            var rawFile = new XMLHttpRequest();
+            rawFile.overrideMimeType("application/json");
+            rawFile.open("GET", file, true);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4 && rawFile.status == "200") {
+                    callback(rawFile.responseText);
+                }
+            }
+            rawFile.send(null);
+        }
+
+        var data;
+        //usage:
+        readTextFile("./products.json", function (text) {
+            data = JSON.parse(text);
+            for (var key in data) {
+                document.getElementById("produkter").innerHTML += '<div class="produktInput"><input type="checkbox" checked class="produkt checkbox" id="' + key + '" name="' + key + '"><label for="' + key + '">' + key + '</label></div>'
+            }
+        });
+
+        document.getElementById("boringmode").addEventListener("change", function () {
+            var body = document.getElementById("body");
+            if (body.classList.contains("enableColors")) {
+                body.classList.remove("enableColors");
+            } else {
+                body.classList.add("enableColors");
+            }
+        });
+
+        document.getElementById("submit").addEventListener('click', function () {
+            document.getElementById("title").innerHTML = document.getElementById("ordrenummer").value;
+            var output = '<div class="page"><table class="outer">\
+            <thead>\
+                <tr>\
+                    <th>Opbevaringsanvisning</th>\
+                </tr>\
+            </thead>\
+            <tbody>\
+                <tr>\
+                    <td>\
+                        <p class="bold">Lyre’s 70cl og 20cl:</p>\
+                        <p>Forsegl altid med originalhætte efter åbning. Lad ikke flasken stå åben, eller udskift hætten med hælder.</p>\
+                        <p>Når den er åben, skal den nedkøles for optimal friskhed. Det anbefales at den indtages inden for 12 uger efter åbning. Lad ikke være ude i kulden. Risiko for nedfrysning.</p>\
+                        <br>\
+                        <p class="bold">Lyre’s Classico Grande og Scavi & Ray 75cl:</p>\
+                        <p>Når den er åbnet, lukkes den bedst med prop, opbevares i køleskab og indtages inden for 2 dage</p>\
+                        <p class="bold">Lyre’s 250ml dåser (RTD):</p>\
+                        <p>Opbevares på et køligt, tørt sted. Når den er åbnet, skal den indtages med det samme. Holdbarhed: 12 måneder.</p>\
+                    </td>\
+                </tr>\
+            </tbody>\
+        </table>';
+            var inputProdukter = document.getElementsByClassName("produkt");
+            var count = 1;
+            for (var i = 0; i < inputProdukter.length; i++) {
+                var input = inputProdukter[i];
+                if (!input.checked) continue;
+                var produkt = input.name;
+                var deklaration = data[produkt].næringsdeklaration
+                var målinger = []
+                var indhold = [];
+                for (var antal in deklaration) {
+                    målinger.push(antal);
+                    for (var næring in deklaration[antal]) {
+                        if (!indhold[næring]) {
+                            indhold[næring] = [];
+                        }
+                        indhold[næring].push(deklaration[antal][næring]);
+                    }
+                }
+                var nutritionalTable = '<table class="">\
+                    <thead>\
+                    <tr>\
+                        <th></th>';
+                for (var j = 0; j < målinger.length; j++) {
+                    var antal = målinger[j];
+
+                    nutritionalTable += '<th>' + antal + '</th>';
+                }
+                nutritionalTable += '</tr>\
+                    </thead>\
+                    <tbody>';
+
+                for (var næring in indhold) {
+                    nutritionalTable += '<tr>';
+                    nutritionalTable += '<td>' + næring + '</td>';
+                    for (var j = 0; j < indhold[næring].length; j++) {
+                        var element = indhold[næring][j];
+
+                        nutritionalTable += '<td>' + element + '</td>';
+                    }
+                    nutritionalTable += '</tr>';
+                }
+
+                nutritionalTable += '</tbody>\
+                    </table>';
+                var table = '<table class="outer">\
+                    <thead>\
+                    <tr>\
+                        <th>'+ produkt + '</th>\
+                    </tr>\
+                    </thead>\
+                    <tbody>\
+                    <tr>\
+                        <td>\
+                            <p class="bold">Ingredienser:</p>\
+                            <p>'+ data[produkt].ingredienser + '</p>\
+                            <p class="bold">Næringsdeklaration</p><br>'+ nutritionalTable + '\
+                            <p class="bold">Allegier:</p>\
+                            <p>'+ data[produkt].allergier + '</p>\
+                        </td>\
+                    </tr>\
+                    </tbody>\
+                    </table>';
+                output += table;
+                console.log(count);
+                if ((count + 1) % 4 == 0) {
+                    console.log(produkt, "got break");
+                    output += '</div>';
+                    output += '<div class="page">';
+                } else {
+
+                    console.log(produkt, "did nothing");
+                }
+                count++;
+            }
+            document.getElementById("output").innerHTML = output;
+        });
+    </script>
+</body>
+
+</html>
