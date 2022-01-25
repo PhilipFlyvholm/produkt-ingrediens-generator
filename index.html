@@ -59,6 +59,7 @@
 
         document.getElementById("submit").addEventListener('click', function () {
             document.getElementById("title").innerHTML = document.getElementById("ordrenummer").value;
+            document.getElementsByTagName("title")[0].innerHTML = document.getElementById("ordrenummer").value;
             var output = '<div class="page"><table class="outer">\
             <thead>\
                 <tr>\
