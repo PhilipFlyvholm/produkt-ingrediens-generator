@@ -44,7 +44,7 @@
         readTextFile("./products.json", function (text) {
             data = JSON.parse(text);
             for (var key in data) {
-                document.getElementById("produkter").innerHTML += '<div class="produktInput"><input type="checkbox" checked class="produkt checkbox" id="' + key + '" name="' + key + '"><label for="' + key + '">' + key + '</label></div>'
+                document.getElementById("produkter").innerHTML += '<div class="produktInput"><input type="checkbox" class="produkt checkbox" id="' + key + '" name="' + key + '"><label for="' + key + '">' + key + '</label></div>'
             }
         });
 
